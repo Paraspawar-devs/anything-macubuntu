@@ -1,43 +1,93 @@
+<div align="center">
+
+<img src="assets/hero-banner.png" alt="AnythingMac Banner" width="100%" style="border-radius: 12px; margin-bottom: 20px;" />
+
 # AnythingMac 🍏🐧
+### *Run Modern macOS Applications Natively & Rootlessly on Linux*
 
-> **Run modern macOS applications natively, seamlessly, and rootlessly on Linux.**
+[![GitHub License](https://img.shields.io/badge/License-GPL_v3-blue.svg?style=for-the-badge&logo=gnu)](LICENSE)
+[![Target macOS](https://img.shields.io/badge/macOS%20Support-13%20Ventura%20→%2016%20Tahoe-34C759.svg?style=for-the-badge&logo=apple)](https://github.com/Paraspawar-devs/anything-macubuntu)
+[![Rootless Security](https://img.shields.io/badge/Security-100%25%20Rootless%20Sandbox-FF9500.svg?style=for-the-badge&logo=linux)](https://github.com/Paraspawar-devs/anything-macubuntu)
+[![Architecture](https://img.shields.io/badge/CPU%20Arch-x86__64-AF52DE.svg?style=for-the-badge)](https://github.com/Paraspawar-devs/anything-macubuntu)
+[![Stars](https://img.shields.io/github/stars/Paraspawar-devs/anything-macubuntu?style=for-the-badge&color=yellow)](https://github.com/Paraspawar-devs/anything-macubuntu/stargazers)
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![Target: macOS Tahoe 16](https://img.shields.io/badge/Compatibility-macOS%2013--16%20Tahoe-brightgreen.svg)](#)
-[![Security: Rootless](https://img.shields.io/badge/Sandbox-Bubblewrap%20Rootless-orange.svg)](#)
-[![Architecture: x86__64](https://img.shields.io/badge/Arch-x86__64-purple.svg)](#)
+<p align="center">
+  <a href="#-why-anythingmac">Why AnythingMac</a> •
+  <a href="#-features">Features</a> •
+  <a href="#-gui-manager">GUI Manager</a> •
+  <a href="#-architecture">Architecture</a> •
+  <a href="#-quickstart">Quickstart</a> •
+  <a href="#-cli-reference">CLI Reference</a> •
+  <a href="#-roadmap">Roadmap</a>
+</p>
 
 ---
 
-## 🌟 Overview
+</div>
 
-**AnythingMac** is a modern macOS compatibility runtime designed for Linux. Built from the ground up to overcome the limitations of legacy emulation projects, AnythingMac brings modern **macOS 13 (Ventura), 14 (Sonoma), 15 (Sequoia), and 16 (Tahoe)** applications to Linux desktops.
+## 💡 The Vision: The "Hackintosh Philosophy" for Linux
 
-By adopting the **Hackintosh Philosophy**—feeding real Mach-O dynamic environments, dynamic Objective-C runtime synthesis, and host-native compilation rather than waiting decades for every framework to be rewritten from scratch—AnythingMac enables apps like modern Chromium browsers (Arc Browser), archive tools (Keka), and developer utilities to execute natively on your Linux CPU.
+Traditional emulation projects attempt to rewrite Apple's proprietary frameworks from scratch line-by-line. Because macOS evolves at breakneck speed, those projects fell years behind, remaining stuck on legacy macOS 10.14 Mojave.
+
+**AnythingMac takes inspiration from the Hackintosh philosophy:**
+> *Software is just code.* Instead of waiting decades for every framework to be rewritten, we feed real Mach-O environments directly to macOS binaries, synthesise missing modern macOS 13–16 Tahoe APIs on-the-fly with dynamic Objective-C method resolution, and isolate everything inside an unprivileged Bubblewrap container.
+
+The result? Modern macOS applications—such as **Arc Browser**, **Keka**, and Swift/Cocoa utilities—can load and execute directly on your Linux CPU.
 
 ---
 
-## 🚀 Key Innovations
+## ⚡ Comparison: Legacy Darling vs. AnythingMac
 
-### 1. 🛡️ 100% Rootless Container Architecture
-- **Zero Sudo / Zero Kernel Modules:** Runs entirely in userspace using Bubblewrap (`bwrap`) containerization coupled with our custom `librootless.so` dynamic shim.
-- **No `darling-mach` DKMS required:** Emulates Mach ports and task structures deterministically without compromising host kernel security.
-- **Isolated User Session:** Emulated container processes run inside a private `/run/user/0` jail, ensuring that buggy macOS clients or crashes never freeze the host GNOME Wayland compositor.
+| Feature | Legacy Darling (Abandoned) | **AnythingMac 🍏🐧** |
+|:---|:---:|:---:|
+| **macOS Version Support** | macOS 10.14 Mojave (2018) | **macOS 13 (Ventura) → macOS 16 (Tahoe)** |
+| **Root Permissions** | ❌ Requires `sudo` / host root | ✅ **100% Rootless (`bwrap` + `librootless.so`)** |
+| **Host Kernel Modules** | ❌ Required fragile `darling-mach` DKMS | ✅ **Zero kernel modules required** |
+| **Compositor Safety** | ⚠️ App crashes freeze GNOME Wayland | ✅ **Isolated container user session (`/run/user/0`)** |
+| **Tahoe 16 Compatibility** | ❌ 0 modern APIs (dyld aborts immediately) | ✅ **3,300+ Tahoe 16 dynamic symbols + ObjC stubbing** |
+| **Host Mach-O Toolchain** | ❌ None (must build inside container) | ✅ **Host-native LLVM 18 Darwin cross-compiler** |
+| **Desktop GUI Manager** | ❌ Command-line only | ✅ **Full GTK Desktop App (`anything-mac-manager`)** |
+| **App Menu Integration** | ❌ Manual configuration | ✅ **Auto-extracts 512×512 icons & creates `.desktop`** |
 
-### 2. ⚡ Tahoe 16 Unified Compatibility Shim
-- **3,300+ Modern macOS Symbols:** Automated dynamic shim (`libanything_mac_tahoe_shim.dylib`) resolving missing symbols across CoreGraphics, Metal, Accelerate, CloudKit, ScreenCaptureKit, and Swift runtime.
-- **Dynamic Objective-C Runtime Synthesis:** Implements `+resolveInstanceMethod:` and `+resolveClassMethod:` dispatchers so missing classes and selector invocations resolve safely without aborting.
-- **Two-Level & Flat Namespace Harmony:** Leverages `DYLD_FORCE_FLAT_NAMESPACE=1` and `DYLD_INSERT_LIBRARIES` to inject compatibility symbols system-wide.
+---
 
-### 3. 🛠️ Host-Native Mach-O Darwin Toolchain
-- Includes native Linux wrappers (`macho-clang`, `ld64`) backed by LLVM 18, capable of compiling and linking genuine universal Mach-O 64-bit `.dylib` and `.o` libraries directly on Linux with zero macOS dependency.
+## ✨ Features
 
-### 4. 🖥️ AnythingMac Manager (Desktop GUI)
-- Modern graphical interface to:
-  - Install `.dmg`, `.pkg`, and `.app` bundles with automatic extraction.
-  - Automatically generate `.desktop` entries with high-resolution 512x512 app icons integrated into the GNOME/KDE application grid.
-  - Control container lifecycle (Start, Stop, Shell, Restart).
-  - Manage isolated prefix environments (`~/.anything-mac`).
+<div align="center">
+
+```
+   ┌────────────────────────────────────────────────────────────────────────┐
+   │ 🛡️  100% Rootless & Non-Privileged                                      │
+   │     Runs in pure userspace with zero sudo and zero kernel modules.      │
+   ├────────────────────────────────────────────────────────────────────────┤
+   │ ⚡  Tahoe 16 Dynamic Compatibility Shim                                 │
+   │     Automated dynamic shim resolving 3,300+ modern symbols across       │
+   │     CoreGraphics, Metal, Accelerate, CloudKit, and Swift runtime.       │
+   ├────────────────────────────────────────────────────────────────────────┤
+   │ 🛠️  Host-Native Mach-O Darwin Toolchain                                │
+   │     Includes macho-clang and ld64 backed by LLVM 18 to build native    │
+   │     Mach-O binaries directly on Linux without macOS.                   │
+   ├────────────────────────────────────────────────────────────────────────┤
+   │ 🖥️  AnythingMac Desktop Manager GUI                                    │
+   │     Beautiful GUI to install .dmg / .pkg / .app packages with 1-click.  │
+   └────────────────────────────────────────────────────────────────────────┘
+```
+
+</div>
+
+---
+
+## 🖥️ GUI Manager (`anything-mac-manager`)
+
+AnythingMac includes a built-in Desktop Application Manager built for GNOME and KDE desktops:
+
+<div align="center">
+  <img src="assets/ui-preview.png" alt="AnythingMac Manager UI Preview" width="90%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+</div>
+
+- **1-Click Package Installation:** Drag-and-drop or select `.dmg`, `.pkg`, or `.app` bundles.
+- **Desktop Grid Integration:** Automatically parses macOS `Info.plist`, converts Apple `.icns` to crystal-clear 512×512 PNGs, and places launchers directly in your Linux application menu.
+- **Container Lifecycle Controls:** One-click buttons to Start, Stop, inspect status, and open interactive Darwin terminal sessions.
 
 ---
 
@@ -45,19 +95,19 @@ By adopting the **Hackintosh Philosophy**—feeding real Mach-O dynamic environm
 
 ```mermaid
 flowchart TD
-    subgraph HostLinux ["Host Linux System (Ubuntu / Debian / Fedora / Arch)"]
-        LinuxKernel["Linux Kernel (POSIX + Namespaces)"]
-        Xwayland["Xwayland / X11 Compositor"]
-        LLVM["Host-Native Mach-O Clang / LLD"]
+    subgraph HostLinux ["Host Linux Desktop (Ubuntu 24.04 / 26.04)"]
+        LinuxKernel["Linux Kernel (Namespaces & POSIX)"]
+        Xwayland["Xwayland / X11 Compositor Layer"]
+        LLVM18["Host Mach-O Toolchain (macho-clang / ld64)"]
     end
 
     subgraph AnythingMacRuntime ["AnythingMac Rootless Runtime"]
         Bwrap["Bubblewrap (bwrap) Sandbox"]
-        LibRootless["librootless.so (UID / GID / Ptrace Shim)"]
+        LibRootless["librootless.so (UID / GID / Ptrace Interceptor)"]
         Dserver["anythingmac-server (Daemon)"]
-        Mldr["mldr (Mach-O ELF Loader)"]
+        Mldr["mldr (Mach-O Dynamic ELF Loader)"]
         Dyld["dyld (Darwin Dynamic Linker)"]
-        TahoeShim["libanything_mac_tahoe_shim.dylib (3,300+ Tahoe 16 APIs)"]
+        TahoeShim["libanything_mac_tahoe_shim.dylib (3,300+ Modern APIs)"]
     end
 
     subgraph macOSApp ["macOS Application Space"]
@@ -77,28 +127,29 @@ flowchart TD
 
 ---
 
-## 💻 CLI Usage
+## 🚀 Quickstart
 
-AnythingMac provides both full-length commands and a quick 4-letter shortcut (`amac`):
-
+### 1. Launch Darwin Shell
+Open an interactive Darwin environment in your terminal:
 ```bash
-# Launch an interactive Darwin Zsh shell
+# Full command
 anything-mac shell
-# or
+
+# Or use the quick 4-letter alias!
 amac shell
+```
 
-# Launch an installed macOS application
-anything-mac launch /Applications/Keka.app
-# or
-amac launch /Applications/Arc.app
+### 2. Launch an Application
+```bash
+# Launch an app from your prefix
+amac launch /Applications/Keka.app
 
-# Check container status
-amac status
+# Or launch directly with bundle path
+amac /Applications/Arc.app
+```
 
-# Gracefully shut down the container
-amac shutdown
-
-# Open the AnythingMac GUI Manager
+### 3. Open the Desktop GUI Manager
+```bash
 anything-mac-manager
 # or
 amac-manager
@@ -106,38 +157,56 @@ amac-manager
 
 ---
 
-## 📦 File Locations & Prefixes
+## ⌨️ CLI Reference
 
-| Component | Default Path |
-|---|---|
-| **Prefix Container** | `~/.anything-mac` (fallback to `~/.darling`) |
-| **Runtime Binaries** | `~/.local/anything-mac` (fallback to `~/.local/darling`) |
-| **CLI Launchers** | `~/.local/bin/anything-mac`, `~/.local/bin/amac` |
-| **GUI Manager** | `~/.local/share/anything-mac-manager/` |
-| **Tahoe Shim** | `/usr/lib/libanything_mac_tahoe_shim.dylib` |
+| Command | Shortcut | Description |
+|---|:---:|---|
+| `anything-mac shell` | `amac shell` | Opens an interactive Darwin Zsh terminal |
+| `anything-mac launch <app>` | `amac launch <app>` | Runs a macOS application bundle |
+| `anything-mac status` | `amac status` | Displays container daemon PID and status |
+| `anything-mac shutdown` | `amac shutdown` | Gracefully terminates container and background daemons |
+| `anything-mac-manager` | `amac-manager` | Launches the GTK Desktop Application Manager |
 
 ---
 
-## 🛠️ Building & Customizing
+## 📂 System Paths
 
-### Prerequisites
-- Clang 14+ / GCC 11+
-- CMake 3.16+
-- Python 3.10+
-- Bubblewrap (`bwrap`)
+| Resource | Path | Description |
+|---|---|---|
+| **Prefix Container** | `~/.anything-mac` | Isolated macOS filesystem root |
+| **Runtime Binaries** | `~/.local/anything-mac` | Core runtime (`mldr`, `dserver`, `librootless`) |
+| **Tahoe Shim** | `/usr/lib/libanything_mac_tahoe_shim.dylib` | Dynamic symbol resolution library |
+| **Host Toolchain** | `~/.local/bin/macho-clang`, `~/.local/bin/ld64` | Native Mach-O compiler and linker |
 
-### Building from Source
-```bash
-git clone https://github.com/your-username/anything-mac.git
-cd anything-mac
-mkdir build && cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/.local/anything-mac
-make -j$(nproc)
-make install
-```
+---
+
+## 🗺️ Roadmap
+
+- [x] **Rootless Container Foundation:** Zero sudo, Bubblewrap sandbox, private user runtime isolation.
+- [x] **Host-Native Mach-O Toolchain:** Cross-compile Darwin binaries without macOS using LLVM 18.
+- [x] **Unified Tahoe 16 Compatibility Shim:** Dynamic symbol generator with 3,300+ symbols.
+- [x] **AnythingMac GUI Manager:** Full desktop GUI with DMG extraction and desktop icon generation.
+- [ ] **GPU Acceleration Bridge:** Vulkan backend translation for Metal & CoreAnimation surfaces.
+- [ ] **Dyld Shared Cache Injection:** Direct integration of genuine macOS 15/16 shared cache frameworks.
+
+---
+
+## 🤝 Contributing
+
+Contributions are warmly welcome! Whether you are interested in Mach-O linkers, Objective-C runtime internals, Wayland graphics pipelines, or macOS framework stubbing:
+
+1. Fork the Project: `git clone https://github.com/Paraspawar-devs/anything-macubuntu.git`
+2. Create your Feature Branch: `git checkout -b feature/AmazingFeature`
+3. Commit your Changes: `git commit -m 'Add AmazingFeature'`
+4. Push to the Branch: `git push origin feature/AmazingFeature`
+5. Open a Pull Request
 
 ---
 
 ## 📄 License
 
-AnythingMac is distributed under the terms of the **GNU General Public License v3 (GPL-3.0)** or later. See [LICENSE](LICENSE) for details.
+AnythingMac is distributed under the terms of the **GNU General Public License v3 (GPL-3.0)**. See the [LICENSE](LICENSE) file for details.
+
+<div align="center">
+  <sub>Built with ❤️ for the Linux and macOS developer community.</sub>
+</div>
