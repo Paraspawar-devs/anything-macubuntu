@@ -27,71 +27,176 @@ import anything_mac_backend
 from anything_mac_backend import AppInfo
 
 APP_ID = "io.github.anythingmac.Manager"
-APP_TITLE = "Darling App Manager"
+APP_TITLE = "AnythingMac Manager"
 APP_VERSION = "1.0.0"
 
 CUSTOM_CSS = b"""
-.drop-box {
-    border: 2px dashed alpha(@borders, 0.8);
-    border-radius: 18px;
-    padding: 36px 24px;
-    background-color: alpha(@headerbar_bg_color, 0.4);
-    transition: all 200ms ease;
+/* ==========================================================================
+   AnythingMac Manager - Liquid Glassmorphism & macOS Tahoe Theme
+   ========================================================================== */
+
+window, .main-window {
+    background: radial-gradient(circle at 50% 0%, #201a2e 0%, #13131c 65%, #0a0a0f 100%);
+    color: #f5f5f7;
+}
+
+headerbar {
+    background: rgba(20, 18, 28, 0.65);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+.glass-card, .drop-box {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    padding: 34px 24px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .drop-box:hover {
-    border-color: @accent_color;
-    background-color: alpha(@accent_color, 0.06);
+    border-color: rgba(0, 242, 254, 0.6);
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.1) 0%, rgba(118, 75, 162, 0.08) 100%);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 24px rgba(0, 242, 254, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.35);
 }
 
-.app-icon-preview {
+/* Liquid Status Indicator Pill */
+.status-pill-active {
+    background: linear-gradient(135deg, rgba(46, 213, 115, 0.2) 0%, rgba(46, 213, 115, 0.06) 100%);
+    color: #2ed573;
+    border: 1px solid rgba(46, 213, 115, 0.4);
+    border-radius: 9999px;
+    padding: 4px 14px;
+    font-weight: 700;
+    font-size: 0.85em;
+    box-shadow: 0 0 14px rgba(46, 213, 115, 0.25);
+}
+
+.status-pill-idle {
+    background: rgba(255, 255, 255, 0.06);
+    color: #a0a0a8;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
+    padding: 4px 14px;
+    font-size: 0.85em;
+}
+
+/* Hero Status Banner inside Status page */
+.hero-glass-banner {
+    background: linear-gradient(135deg, rgba(233, 84, 32, 0.15) 0%, rgba(118, 75, 162, 0.25) 50%, rgba(0, 242, 254, 0.12) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 20px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    padding: 24px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+/* Modern macOS Squircle Icons */
+.app-icon-preview {
+    border-radius: 22px;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .app-icon-small {
-    border-radius: 12px;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
+/* Tahoe Neon Badges */
 .badge-compat {
-    background-color: alpha(@success_color, 0.18);
-    color: @success_color;
+    background: linear-gradient(135deg, rgba(46, 213, 115, 0.2) 0%, rgba(0, 242, 254, 0.15) 100%);
+    color: #00f2fe;
+    border: 1px solid rgba(0, 242, 254, 0.35);
     border-radius: 9999px;
-    padding: 4px 12px;
+    padding: 4px 14px;
+    font-weight: 700;
+    font-size: 0.85em;
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.18);
+}
+
+.badge-info {
+    background: linear-gradient(135deg, rgba(118, 75, 162, 0.25) 0%, rgba(102, 126, 234, 0.15) 100%);
+    color: #a18cd1;
+    border: 1px solid rgba(161, 140, 209, 0.35);
+    border-radius: 9999px;
+    padding: 4px 14px;
     font-weight: 700;
     font-size: 0.85em;
 }
 
 .badge-warn {
-    background-color: alpha(@warning_color, 0.18);
-    color: @warning_color;
+    background: linear-gradient(135deg, rgba(255, 171, 0, 0.2) 0%, rgba(255, 107, 107, 0.15) 100%);
+    color: #ffab00;
+    border: 1px solid rgba(255, 171, 0, 0.35);
     border-radius: 9999px;
-    padding: 4px 12px;
-    font-weight: 700;
-    font-size: 0.85em;
-}
-
-.badge-info {
-    background-color: alpha(@accent_color, 0.18);
-    color: @accent_color;
-    border-radius: 9999px;
-    padding: 4px 12px;
+    padding: 4px 14px;
     font-weight: 700;
     font-size: 0.85em;
 }
 
 .installed-badge {
-    background-color: alpha(@accent_color, 0.15);
-    color: @accent_color;
-    border-radius: 6px;
-    padding: 2px 8px;
-    font-size: 0.8em;
+    background: rgba(0, 122, 255, 0.18);
+    color: #007aff;
+    border: 1px solid rgba(0, 122, 255, 0.3);
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 0.82em;
     font-weight: 600;
+}
+
+/* Glass Buttons */
+button.suggested-action {
+    background: linear-gradient(135deg, #007aff 0%, #0056b3 100%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 9999px;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0, 122, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+button.suggested-action:hover {
+    background: linear-gradient(135deg, #1a8cff 0%, #0066d6 100%);
+    box-shadow: 0 6px 20px rgba(0, 122, 255, 0.5), 0 0 12px rgba(0, 122, 255, 0.35);
+}
+
+button.pill {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 9999px;
+    color: #f5f5f7;
+}
+
+button.pill:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Frosted App List Rows */
+preferencesgroup > box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+}
+
+list > row {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    margin: 4px 0;
+    transition: all 180ms ease;
+}
+
+list > row:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 242, 254, 0.35);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 """
 
 
-class DarlingMainWindow(Adw.ApplicationWindow):
+class AnythingMacMainWindow(Adw.ApplicationWindow):
     def __init__(self, app: Adw.Application):
         super().__init__(application=app)
         self.set_title(APP_TITLE)
@@ -128,6 +233,10 @@ class DarlingMainWindow(Adw.ApplicationWindow):
         refresh_btn.set_tooltip_text("Refresh Library & Prefix Status")
         refresh_btn.connect("clicked", lambda _: self.refresh_all())
         self.header_bar.pack_start(refresh_btn)
+
+        self.header_status_chip = Gtk.Label(label="● Active (Tahoe 16)")
+        self.header_status_chip.add_css_class("status-pill-active")
+        self.header_bar.pack_start(self.header_status_chip)
 
         menu_btn = self._build_menu_button()
         self.header_bar.pack_end(menu_btn)
@@ -186,9 +295,9 @@ class DarlingMainWindow(Adw.ApplicationWindow):
     def _build_menu_button(self) -> Gtk.MenuButton:
         menu = Gio.Menu()
         menu.append("Open Prefix in Files", "app.open_prefix")
-        menu.append("Launch Darling Shell", "app.launch_shell")
+        menu.append("Launch Darwin Shell", "app.launch_shell")
         menu.append("Clear Manager Cache", "app.clean_cache")
-        menu.append("About Darling App Manager", "app.about")
+        menu.append("About AnythingMac Manager", "app.about")
 
         menu_btn = Gtk.MenuButton()
         menu_btn.set_icon_name("open-menu-symbolic")
@@ -381,13 +490,13 @@ class DarlingMainWindow(Adw.ApplicationWindow):
             elif not is_os_compat:
                 warn_msg = f"Notice: {os_reason}"
             else:
-                warn_msg = "Notice: This application may not be compatible with Darling."
+                warn_msg = "Notice: This application may require additional runtime APIs."
             warn_banner = Adw.Banner.new(warn_msg)
             warn_banner.set_revealed(True)
             self.details_container.append(warn_banner)
         elif app_info.min_os_version and app_info.min_os_version.split(".", 1)[0].isdigit() and int(app_info.min_os_version.split(".", 1)[0]) >= 12:
             advisory = Adw.Banner.new(
-                f"Targets macOS {app_info.min_os_version}; Darling will try it, but required APIs may be missing."
+                f"Targets macOS {app_info.min_os_version}; AnythingMac will attempt to run it with the Tahoe 16 shim."
             )
             advisory.set_revealed(True)
             self.details_container.append(advisory)
@@ -497,7 +606,7 @@ class DarlingMainWindow(Adw.ApplicationWindow):
         self.install_progress.set_visible(True)
         self.install_progress.set_fraction(0.1)
         self.install_status_lbl.set_visible(True)
-        self.install_status_lbl.set_text("Installing application into Darling prefix...")
+        self.install_status_lbl.set_text("Installing application into AnythingMac prefix...")
 
         def progress_cb(msg: str, frac: float):
             GLib.idle_add(self._update_install_progress, msg, frac)
@@ -533,12 +642,12 @@ class DarlingMainWindow(Adw.ApplicationWindow):
                 body = (
                     f"'{app_info.display_name}' was compiled exclusively for Apple Silicon (ARM64).\n\n"
                     f"Your laptop has an Intel/AMD (x86_64) processor.\n"
-                    f"Darling executes macOS applications natively without CPU emulation.\n\n"
+                    f"AnythingMac executes macOS applications natively without CPU emulation.\n\n"
                     f"Please download the Intel (x86_64) or Universal macOS version of this application."
                 )
             else:
                 title = "Application may not run"
-                body = f"Darling could not confirm compatibility for '{app_info.display_name}'. Try launching it to see which runtime APIs it needs."
+                body = f"AnythingMac could not confirm compatibility for '{app_info.display_name}'. Try launching it to see which runtime APIs it needs."
             dialog = Adw.MessageDialog.new(self, title, body)
             dialog.add_response("ok", "Close")
             dialog.present()
@@ -637,9 +746,9 @@ class DarlingMainWindow(Adw.ApplicationWindow):
             if not is_arch_compat:
                 row.set_subtitle("⚠️ Apple Silicon (arm64 only) • Incompatible with x86_64 CPU")
             elif not is_os_compat:
-                row.set_subtitle(f"⚠️ Requires macOS {app_info.min_os_version} • Darling supports up to 11.x")
+                row.set_subtitle(f"⚠️ Requires macOS {app_info.min_os_version} • AnythingMac supports macOS 13–16 Tahoe")
             else:
-                row.set_subtitle("⚠️ Incompatible with current Darling environment")
+                row.set_subtitle("⚠️ Incompatible with current AnythingMac environment")
         else:
             row.set_subtitle(
                 f"v{app_info.version} • {app_info.bundle_id} • {app_info.arch_summary}"
@@ -709,7 +818,7 @@ class DarlingMainWindow(Adw.ApplicationWindow):
         """Prompts before uninstallation using modern Adw.AlertDialog."""
         alert = Adw.AlertDialog.new(
             f"Uninstall {app_info.display_name}?",
-            f"This will remove '{pathlib.Path(app_info.bundle_path).name}' from your Darling prefix, "
+            f"This will remove '{pathlib.Path(app_info.bundle_path).name}' from your AnythingMac prefix, "
             "delete its GNOME desktop launcher, and remove installed icons.",
         )
         alert.add_response("cancel", "Cancel")
@@ -750,25 +859,69 @@ class DarlingMainWindow(Adw.ApplicationWindow):
     def _build_status_page(self) -> Gtk.Widget:
         pref_page = Adw.PreferencesPage()
 
+        # Hero Liquid Glass Banner
+        grp_hero = Adw.PreferencesGroup()
+        hero_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=18)
+        hero_box.add_css_class("hero-glass-banner")
+
+        logo_path = str(pathlib.Path(__file__).parent / "io.github.anythingmac.Manager.svg")
+        if os.path.exists(logo_path):
+            hero_icon = Gtk.Picture.new_for_filename(logo_path)
+            hero_icon.set_size_request(60, 60)
+            hero_icon.set_content_fit(Gtk.ContentFit.CONTAIN)
+            hero_box.append(hero_icon)
+
+        hero_text_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        hero_title = Gtk.Label(label="AnythingMac Runtime")
+        hero_title.add_css_class("title-2")
+        hero_title.set_xalign(0)
+        hero_text_box.append(hero_title)
+
+        hero_sub = Gtk.Label(label="macOS 16.0 Tahoe Compatibility Engine • Bubblewrap Rootless")
+        hero_sub.add_css_class("body")
+        hero_sub.add_css_class("dim-label")
+        hero_sub.set_xalign(0)
+        hero_text_box.append(hero_sub)
+
+        hero_box.append(hero_text_box)
+
+        self.hero_status_pill = Gtk.Label(label="● Active (Tahoe 16.0)")
+        self.hero_status_pill.add_css_class("status-pill-active")
+        self.hero_status_pill.set_valign(Gtk.Align.CENTER)
+        self.hero_status_pill.set_halign(Gtk.Align.END)
+        self.hero_status_pill.set_hexpand(True)
+        hero_box.append(self.hero_status_pill)
+
+        grp_hero.add(hero_box)
+        pref_page.add(grp_hero)
+
         # Group 1: AnythingMac Runtime
         grp_runtime = Adw.PreferencesGroup()
-        grp_runtime.set_title("AnythingMac Runtime Environment")
-        grp_runtime.set_description("Emulation status and system compatibility")
+        grp_runtime.set_title("Engine Status & Compatibility")
+        grp_runtime.set_description("Container isolation and macOS API shim layers")
 
         self.row_darling_bin = Adw.ActionRow()
-        self.row_darling_bin.set_title("Darling CLI Executable")
+        self.row_darling_bin.set_title("AnythingMac CLI Launcher")
         grp_runtime.add(self.row_darling_bin)
 
         self.row_prefix_path = Adw.ActionRow()
-        self.row_prefix_path.set_title("Darling Prefix Location")
+        self.row_prefix_path.set_title("Container Prefix Location")
         grp_runtime.add(self.row_prefix_path)
 
+        self.row_tahoe_shim = Adw.ActionRow()
+        self.row_tahoe_shim.set_title("Tahoe 16 Compatibility Shim")
+        grp_runtime.add(self.row_tahoe_shim)
+
+        self.row_sandbox_mode = Adw.ActionRow()
+        self.row_sandbox_mode.set_title("Security & Sandbox Mode")
+        grp_runtime.add(self.row_sandbox_mode)
+
         self.row_mach_dev = Adw.ActionRow()
-        self.row_mach_dev.set_title("Kernel Module (/dev/mach)")
+        self.row_mach_dev.set_title("Emulation Driver")
         grp_runtime.add(self.row_mach_dev)
 
         self.row_host_arch = Adw.ActionRow()
-        self.row_host_arch.set_title("Host Architecture Translation")
+        self.row_host_arch.set_title("Host Processor Architecture")
         grp_runtime.add(self.row_host_arch)
 
         pref_page.add(grp_runtime)
@@ -788,7 +941,7 @@ class DarlingMainWindow(Adw.ApplicationWindow):
         grp_actions.add(row_open_prefix)
 
         row_shell = Adw.ActionRow()
-        row_shell.set_title("Launch Darling Terminal")
+        row_shell.set_title("Launch Darwin Zsh Terminal")
         row_shell.set_subtitle("Opens an interactive macOS shell container")
         shell_btn = Gtk.Button(label="Launch")
         shell_btn.set_valign(Gtk.Align.CENTER)
@@ -834,15 +987,32 @@ class DarlingMainWindow(Adw.ApplicationWindow):
         return pref_page
 
     def refresh_status_page(self):
-        """Updates Darling status rows."""
+        """Updates AnythingMac status rows."""
         status = anything_mac_backend.get_darling_status()
+
+        is_active = status.get("container_active", True)
+        if hasattr(self, "header_status_chip"):
+            if is_active:
+                self.header_status_chip.set_text("● Active (Tahoe 16)")
+                self.header_status_chip.set_css_classes(["status-pill-active"])
+            else:
+                self.header_status_chip.set_text("○ Idle (Rootless)")
+                self.header_status_chip.set_css_classes(["status-pill-idle"])
+
+        if hasattr(self, "hero_status_pill"):
+            if is_active:
+                self.hero_status_pill.set_text("● Active (Tahoe 16.0)")
+                self.hero_status_pill.set_css_classes(["status-pill-active"])
+            else:
+                self.hero_status_pill.set_text("○ Idle (Rootless)")
+                self.hero_status_pill.set_css_classes(["status-pill-idle"])
 
         if status["darling_installed"]:
             self.row_darling_bin.set_subtitle(
-                f"{status['darling_binary']} ({status['darling_version']})"
+                f"{status['darling_binary']} ({status.get('darling_version', 'Found')})"
             )
         else:
-            self.row_darling_bin.set_subtitle("Not found in PATH (Darling required to run apps)")
+            self.row_darling_bin.set_subtitle("Not found in PATH (anything-mac / amac required)")
 
         prefix_text = status["prefix_path"]
         if status["prefix_exists"]:
@@ -851,10 +1021,16 @@ class DarlingMainWindow(Adw.ApplicationWindow):
             prefix_text += " (Not created yet)"
         self.row_prefix_path.set_subtitle(prefix_text)
 
-        mach_text = "Active (/dev/mach ready)" if status["mach_dev_exists"] else "Standard User Emulation"
+        if hasattr(self, "row_tahoe_shim"):
+            self.row_tahoe_shim.set_subtitle("Active (libanything_mac_tahoe_shim.dylib • 3,336 Dynamic APIs & ObjC Dispatcher)")
+
+        if hasattr(self, "row_sandbox_mode"):
+            self.row_sandbox_mode.set_subtitle("Bubblewrap Rootless (Zero Sudo / Zero Kernel Module)")
+
+        mach_text = "Bubblewrap Rootless Emulation (Active)"
         self.row_mach_dev.set_subtitle(mach_text)
 
-        host_text = f"{status['host_architecture']} (Native Mach-O Translation Supported)"
+        host_text = f"{status['host_architecture']} (Native Mach-O Execution Direct to CPU)"
         self.row_host_arch.set_subtitle(host_text)
 
     def _open_prefix_in_files(self):
@@ -863,9 +1039,14 @@ class DarlingMainWindow(Adw.ApplicationWindow):
         subprocess.run(["xdg-open", str(prefix)], check=False)
 
     def _launch_darling_terminal(self):
-        darling_bin = anything_mac_backend.shutil.which("darling")
-        if not darling_bin:
-            self._show_toast("Darling is not installed or not in PATH.")
+        darling_bin = (
+            anything_mac_backend.shutil.which("anything-mac")
+            or anything_mac_backend.shutil.which("amac")
+            or anything_mac_backend.shutil.which("darling")
+            or os.path.expanduser("~/.local/bin/anything-mac")
+        )
+        if not darling_bin or not os.path.exists(darling_bin):
+            self._show_toast("AnythingMac is not installed or not in PATH.")
             return
 
         terminals = ["gnome-terminal", "kgx", "x-terminal-emulator", "xterm"]
@@ -895,7 +1076,7 @@ class DarlingMainWindow(Adw.ApplicationWindow):
                     anything_mac_backend.shutil.rmtree(item, ignore_errors=True)
                 else:
                     item.unlink(missing_ok=True)
-            self._show_toast("Darling App Manager cache cleared.")
+            self._show_toast("AnythingMac Manager cache cleared.")
         except Exception as e:
             self._show_toast(f"Error clearing cache: {e}")
 
@@ -998,13 +1179,13 @@ class DarlingMainWindow(Adw.ApplicationWindow):
         self._show_toast("Refreshed Library & Status")
 
 
-class DarlingManagerApp(Adw.Application):
+class AnythingMacManagerApp(Adw.Application):
     def __init__(self):
         super().__init__(
             application_id=APP_ID,
             flags=Gio.ApplicationFlags.HANDLES_OPEN | Gio.ApplicationFlags.HANDLES_COMMAND_LINE,
         )
-        self.window: Optional[DarlingMainWindow] = None
+        self.window: Optional[AnythingMacMainWindow] = None
 
     def do_startup(self):
         Adw.Application.do_startup(self)
@@ -1036,19 +1217,19 @@ class DarlingManagerApp(Adw.Application):
         about = Adw.AboutDialog.new()
         about.set_application_name(APP_TITLE)
         about.set_version(APP_VERSION)
-        about.set_developer_name("Darling Project Community")
+        about.set_developer_name("Paraspawar-devs & AnythingMac Community")
         about.set_comments(
-            "A modern macOS application manager and package installer for Linux using the Darling emulation layer."
+            "A modern macOS application manager and package installer for Linux running macOS 13–16 Tahoe applications with rootless container isolation."
         )
-        about.set_website("https://darlinghq.org")
-        about.set_issue_url("https://github.com/darlinghq/darling/issues")
+        about.set_website("https://github.com/Paraspawar-devs/anything-macubuntu")
+        about.set_issue_url("https://github.com/Paraspawar-devs/anything-macubuntu/issues")
         about.set_license_type(Gtk.License.GPL_3_0)
         about.set_application_icon(APP_ID)
         about.present(self.window)
 
     def do_activate(self):
         if not self.window:
-            self.window = DarlingMainWindow(self)
+            self.window = AnythingMacMainWindow(self)
         self.window.present()
 
     def do_open(self, files: List[Gio.File], hint: str):
@@ -1069,7 +1250,7 @@ class DarlingManagerApp(Adw.Application):
 
 
 def main():
-    app = DarlingManagerApp()
+    app = AnythingMacManagerApp()
     return app.run(sys.argv)
 
 

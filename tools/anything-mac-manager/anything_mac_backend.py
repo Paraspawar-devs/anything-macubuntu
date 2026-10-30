@@ -128,10 +128,13 @@ def format_size(num_bytes: int) -> str:
 
 
 def get_darling_prefix() -> pathlib.Path:
-    """Returns the Darling prefix directory path."""
-    prefix_env = os.environ.get("ANYTHING_MAC_PREFIX")
+    """Returns the AnythingMac prefix directory path."""
+    prefix_env = os.environ.get("ANYTHING_MAC_PREFIX") or os.environ.get("DARLING_PREFIX")
     if prefix_env:
         return pathlib.Path(prefix_env).expanduser()
+    p_amac = pathlib.Path("~/.anything-mac").expanduser()
+    if p_amac.is_dir():
+        return p_amac
     return pathlib.Path("~/.darling").expanduser()
 
 
@@ -1303,15 +1306,23 @@ def launch_app(app_info: Union[AppInfo, str], method: str = "auto") -> Tuple[boo
 
 
 def get_darling_status() -> Dict[str, Any]:
-    """Inspects Darling prefix, runtime, and system status."""
-    darling_bin = shutil.which("darling")
+    """Inspects AnythingMac prefix, runtime, and system status."""
+    darling_bin = (
+        shutil.which("anything-mac")
+        or shutil.which("amac")
+        or shutil.which("darling")
+    )
     if not darling_bin:
         for p in [
+            os.path.expanduser("~/.local/bin/anything-mac"),
+            os.path.expanduser("~/.local/bin/amac"),
             os.path.expanduser("~/.local/bin/darling"),
+            os.path.expanduser("~/.local/anything-mac/usr/bin/darling"),
             os.path.expanduser("~/.local/darling/usr/bin/darling"),
+            "/usr/local/bin/anything-mac",
+            "/usr/bin/anything-mac",
             "/usr/local/bin/darling",
             "/usr/bin/darling",
-            "/opt/darling/bin/darling",
         ]:
             if os.path.exists(p) and os.access(p, os.X_OK):
                 darling_bin = p
@@ -1319,6 +1330,15 @@ def get_darling_status() -> Dict[str, Any]:
 
     prefix = get_darling_prefix()
     prefix_exists = prefix.is_dir()
+
+    # Container status
+    sock1 = prefix / ".anythingmacserver.sock"
+    sock2 = prefix / ".darlingserver.sock"
+    container_active = sock1.exists() or sock2.exists()
+
+    # Tahoe shim status
+    shim_path = prefix / "usr/lib/libanything_mac_tahoe_shim.dylib"
+    has_tahoe_shim = shim_path.exists()
 
     prefix_size = 0
     if prefix_exists:
@@ -1355,6 +1375,9 @@ def get_darling_status() -> Dict[str, Any]:
         "prefix_exists": prefix_exists,
         "prefix_size_formatted": format_size(prefix_size),
         "mach_dev_exists": mach_dev_exists,
+        "container_active": container_active,
+        "has_tahoe_shim": has_tahoe_shim,
+        "tahoe_version": "16.0 (Tahoe)",
         "host_architecture": host_arch,
         "is_host_x86_64": host_arch in ("x86_64", "AMD64"),
     }
