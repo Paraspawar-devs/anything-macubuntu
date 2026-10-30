@@ -1,0 +1,139 @@
+Source: anything-mac
+Maintainer: Lubos Dolezel <lubos@dolezel.info>
+Section: misc
+Priority: optional
+Standards-Version: 4.4.0
+Build-Depends: cmake, clang | clang-9, bison, flex, libfuse-dev, libudev-dev, pkg-config, libc6-dev-i386, linux-headers-amd64|linux-headers-generic, gcc-multilib, libcairo2-dev, libgl1-mesa-dev, libtiff5-dev, libfreetype6-dev, libelf-dev, libxml2-dev, libegl1-mesa-dev, libglu1-mesa-dev, libfontconfig1-dev, libbsd-dev, debhelper, ninja-build, libxrandr-dev, libxcursor-dev, libgif-dev, libavcodec-dev, libavformat-dev, libswresample-dev, libavutil-dev, libpulse-dev, libavformat-dev, libavcodec-dev, libdbus-1-dev, libxkbfile-dev, libcap-dev, llvm-dev, libvulkan-dev, libcap2-bin
+
+Package: anything-mac
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, anything-mac-cli, anything-mac-python2, anything-mac-ruby, anything-mac-perl, anything-mac-gui, anything-mac-gui-stubs, anything-mac-pyobjc
+Description: AnythingMac
+ Translation layer for running macOS software on Linux
+
+Package: anything-mac-extra
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, anything-mac, anything-mac-jsc, anything-mac-cli-extra
+Description: Extra components for AnythingMac
+ Extra components for AnythingMac that are not part of a typical ("stock") installation
+
+Package: anything-mac-core
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, xdg-user-dirs
+Description: AnythingMac core components
+ Core components of AnythingMac
+
+Package: anything-mac-system
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-core
+Description: AnythingMac system components
+ System components of AnythingMac
+
+Package: anything-mac-cli
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-system, anything-mac-cli-gui-common, anything-mac-cli-python2-common
+Description: AnythingMac CLI components
+ CLI components of AnythingMac
+
+Package: anything-mac-ffi
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-core
+Description: libffi for AnythingMac
+ libffi built for use within AnythingMac
+
+Package: anything-mac-cli-devenv
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-cli, anything-mac-python2, anything-mac-ruby, anything-mac-perl, anything-mac-cli-devenv-gui-common, anything-mac-cli-devenv-gui-stubs-common, anything-mac-iosurface
+Description: AnythingMac developer environment
+ A AnythingMac environment for CLI-only programs for building and developing using the command line developer tools
+Conflicts: anything-mac-gui, anything-mac-gui-stubs
+
+Package: anything-mac-cli-gui-common
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-system
+Description: AnythingMac CLI and GUI common components
+ Components of AnythingMac that are shared between the CLI and GUI components
+
+Package: anything-mac-iokitd
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-system, anything-mac-iosurface
+Description: AnythingMac IOKit daemon
+ IOKit daemon for AnythingMac
+
+Package: anything-mac-cli-devenv-gui-common
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-system
+Description: AnythingMac developer environment and GUI common components
+ Components of AnythingMac that are shared between the developer environment and the GUI components
+
+Package: anything-mac-cli-extra
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-cli
+Description: Extra AnythingMac CLI components
+ Non-standard CLI components of AnythingMac
+
+Package: anything-mac-gui
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-system, anything-mac-cli-devenv-gui-common, anything-mac-iokitd, anything-mac-cli-gui-common, anything-mac-iosurface
+Description: AnythingMac GUI components
+ GUI components of AnythingMac
+
+Package: anything-mac-python2
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-core, anything-mac-cli-python2-common, anything-mac-ffi
+Description: Python 2 for AnythingMac
+ Python 2 (and associated programs) built for use within AnythingMac
+
+Package: anything-mac-cli-python2-common
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-core
+Description: AnythingMac CLI and Python 2 common components
+ Components of AnythingMac that are shared between the CLI and Python 2 components
+
+Package: anything-mac-pyobjc
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-gui-stubs, anything-mac-python2
+Description: PyObjC for AnythingMac
+ PyObjC built for use within AnythingMac
+
+Package: anything-mac-ruby
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-core, anything-mac-ffi
+Description: Ruby for AnythingMac
+ Ruby built for use within AnythingMac
+
+Package: anything-mac-perl
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-core
+Description: Perl for AnythingMac
+ Perl built for use within AnythingMac
+
+Package: anything-mac-jsc-webkit-common
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-system
+Description: AnythingMac JavaScriptCore and WebKit common components
+ Components of AnythingMac that are shared between JavaScriptCore and WebKit
+
+Package: anything-mac-jsc
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-system, anything-mac-jsc-webkit-common
+Description: JavaScriptCore for AnythingMac
+ JavaScriptCore built for use within AnythingMac
+
+Package: anything-mac-iosurface
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-system
+Description: IOSurface framework for AnythingMac
+ IOSurface framework built for use within AnythingMac
+
+Package: anything-mac-cli-devenv-gui-stubs-common
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-cli-devenv-gui-common
+Description: AnythingMac developer environment and GUI stubs common components
+ Components of AnythingMac that are shared between the developer environment and GUI stub components
+
+Package: anything-mac-gui-stubs
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${macho:Depends}, anything-mac-gui, anything-mac-cli-devenv-gui-stubs-common
+Description: AnythingMac GUI stub components
+ GUI stub components of AnythingMac

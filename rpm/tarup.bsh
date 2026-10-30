@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -euxv
+
+CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
+if [ -e "${CWD}/SOURCES/anything-mac.tar.gz" ]; then
+  rm "${CWD}/SOURCES/anything-mac.tar.gz"
+fi
+if [ -e "${CWD}/SOURCES/anything-mac-macho-deps.tar.gz" ]; then
+  rm "${CWD}/SOURCES/anything-mac-macho-deps.tar.gz"
+fi
+tar --transform "s|^\./|anything-mac/|" -cf "${CWD}/SOURCES/anything-mac.tar.gz" -C "${CWD}/.." --exclude=.git --exclude SOURCES --exclude SRPMS --exclude RPMS --exclude BUILD .
+tar --transform "s|^\./|anything-mac-macho-deps/|" -cf "${CWD}/SOURCES/anything-mac-macho-deps.tar.gz" -C "${CWD}/../tools/rpm" .

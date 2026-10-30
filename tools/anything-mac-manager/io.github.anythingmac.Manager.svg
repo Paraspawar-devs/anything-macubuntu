@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3584e4"/>
+      <stop offset="50%" stop-color="#1c71d8"/>
+      <stop offset="100%" stop-color="#1a5fb4"/>
+    </linearGradient>
+
+    <!-- Inner Card Gradient -->
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#f6f5f4" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <!-- Accent Gradient -->
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e01b24"/>
+      <stop offset="100%" stop-color="#c01c28"/>
+    </linearGradient>
+
+    <!-- Shadow filter -->
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+    <filter id="subtleShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Base macOS Squircle Container -->
+  <rect x="32" y="32" width="448" height="448" rx="100" ry="100" fill="url(#bgGrad)" filter="url(#dropShadow)"/>
+
+  <!-- Top highlight inner stroke -->
+  <rect x="34" y="34" width="444" height="444" rx="98" ry="98" fill="none" stroke="#ffffff" stroke-width="2" stroke-opacity="0.3"/>
+
+  <!-- Inner Package / Box Surface -->
+  <g filter="url(#subtleShadow)">
+    <!-- Package flaps / folder shape -->
+    <path d="M 120 180 C 120 160 136 144 156 144 L 230 144 L 260 174 L 356 174 C 376 174 392 190 392 210 L 392 350 C 392 370 376 386 356 386 L 156 386 C 136 386 120 370 120 350 Z"
+          fill="url(#cardGrad)" stroke="#deddda" stroke-width="1.5"/>
+
+    <!-- Folder Tab Line -->
+    <path d="M 120 216 L 392 216" stroke="#c0bfbc" stroke-width="2" stroke-dasharray="2,2"/>
+  </g>
+
+  <!-- Darling App Emblem (Apple silhouette with Linux Tux beak/paw or cute heart badge) -->
+  <g transform="translate(256, 280)">
+    <!-- Apple Outline -->
+    <path d="M -4 -64 C 8 -82 24 -92 40 -92 C 42 -76 34 -60 22 -50 C 10 -40 -6 -34 -4 -64 Z" fill="#2ec27e"/>
+    
+    <path d="M 0 -44 C 18 -44 32 -32 46 -32 C 60 -32 76 -46 94 -34 C 114 -20 122 10 112 40 C 104 62 88 100 64 100 C 48 100 40 88 22 88 C 4 88 -4 100 -20 100 C -44 100 -62 60 -70 40 C -82 6 -74 -26 -52 -38 C -34 -48 -18 -44 0 -44 Z" 
+          fill="#3584e4" opacity="0.12"/>
+          
+    <!-- Gear Lever / Manager Gear Wheel Overlay -->
+    <g transform="translate(0, 10)">
+      <circle cx="0" cy="0" r="48" fill="#1c71d8"/>
+      <circle cx="0" cy="0" r="22" fill="#ffffff"/>
+      <!-- Gear Teeth -->
+      <path d="M -8 -58 L 8 -58 L 6 -46 L -6 -46 Z
+               M -8 58 L 8 58 L 6 46 L -6 46 Z
+               M -58 -8 L -58 8 L -46 6 L -46 -6 Z
+               M 58 -8 L 58 8 L 46 6 L 46 -6 Z
+               M -42 -42 L -30 -54 L -22 -44 L -32 -32 Z
+               M 42 42 L 30 54 L 22 44 L 32 32 Z
+               M -42 42 L -54 30 L -44 22 L -32 32 Z
+               M 42 -42 L 54 -30 L 44 -22 L 32 -32 Z" fill="#1c71d8"/>
+    </g>
+
+    <!-- Arrow down / Install Symbol in Center -->
+    <path d="M 0 -8 L 0 12 M -8 4 L 0 12 L 8 4" fill="none" stroke="#1c71d8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Darling text badge in bottom corner -->
+  <rect x="176" y="404" width="160" height="28" rx="14" ry="14" fill="#ffffff" fill-opacity="0.25"/>
+  <text x="256" y="423" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="1.5">DARLING</text>
+</svg>

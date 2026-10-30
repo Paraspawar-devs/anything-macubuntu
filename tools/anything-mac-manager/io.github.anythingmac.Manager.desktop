@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Darling App Manager
+GenericName=macOS Application Manager
+Comment=Inspect, install, and manage macOS applications (.dmg, .pkg, .app) with Darling
+Exec=anything-mac-manager %U
+Icon=io.github.anythingmac.Manager
+Terminal=false
+Categories=Utility;PackageManager;System;
+MimeType=application/x-apple-diskimage;application/x-dmg;application/vnd.apple.installer+xml;
+StartupNotify=true
+StartupWMClass=io.github.anythingmac.Manager
+Keywords=darling;macos;apple;dmg;pkg;app;installer;emulator;

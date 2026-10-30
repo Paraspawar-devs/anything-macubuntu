@@ -1,0 +1,314 @@
+#!/usr/bin/env bash
+# Rootless Darling launcher for Ubuntu 26.04.1 LTS Resolute
+# Runs macOS applications seamlessly without root / kernel module
+set -euo pipefail
+
+runtime_root="${ANYTHING_MAC_DIR:-${HOME}/.local/darling}"
+prefix="${ANYTHING_MAC_PREFIX:-${HOME}/.darling}"
+socket_path="${prefix}/.darlingserver.sock"
+pid_file="${prefix}/.darlingserver.pid"
+dserver_bin="${runtime_root}/usr/bin/darlingserver"
+mldr_bin="${runtime_root}/usr/libexec/darling/usr/libexec/darling/mldr"
+shim="${runtime_root}/librootless.so"
+bwrap="$(command -v bwrap || true)"
+
+if [[ -z "$bwrap" || ! -f "$shim" || ! -x "$mldr_bin" || ! -x "$dserver_bin" ]]; then
+    # Fallback to system darling if available
+    while IFS= read -r candidate; do
+        [[ -n "$candidate" && -x "$candidate" ]] || continue
+        [[ "$(readlink -f "$candidate")" == "$(readlink -f "$0")" ]] && continue
+        exec "$candidate" "$@"
+    done < <(type -a -p darling 2>/dev/null || true)
+
+    echo "Error: Rootless Darling runtime not found at ${runtime_root}." >&2
+    exit 127
+fi
+
+mkdir -p "$prefix"
+
+# Ensure darlingserver daemon is running on host
+is_dserver_alive() {
+    if [[ -f "$pid_file" && -S "$socket_path" ]]; then
+        local pid
+        pid=$(cat "$pid_file" 2>/dev/null || true)
+        if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
+if ! is_dserver_alive; then
+    rm -f "$socket_path" "$pid_file"
+    # Start darlingserver daemon on host with librootless shim
+    # Using pipe synchronization for deterministic ready signal
+    python3 -c "
+import os, select, subprocess, sys
+prefix = '$prefix'
+runtime = '$runtime_root'
+dserver = '$dserver_bin'
+shim = '$shim'
+sock = '$socket_path'
+pidfile = '$pid_file'
+
+r, w = os.pipe()
+env = os.environ.copy()
+env['LD_PRELOAD'] = shim
+env['ANYTHING_MAC_DIR'] = runtime
+env['ANYTHING_MAC_PREFIX'] = prefix
+
+proc = subprocess.Popen(
+    [dserver, prefix, str(os.getuid()), str(os.getgid()), str(w), '0'],
+    env=env,
+    pass_fds=(w,),
+    stdout=subprocess.DEVNULL,
+    stderr=subprocess.DEVNULL,
+    start_new_session=True
+)
+os.close(w)
+readable, _, _ = select.select([r], [], [], 5.0)
+if readable:
+    sig = os.read(r, 1)
+    os.close(r)
+    if sig == b'.':
+        with open(pidfile, 'w') as f:
+            f.write(str(proc.pid))
+        sys.exit(0)
+os.close(r)
+if proc.poll() is None:
+    proc.terminate()
+    try:
+        proc.wait(timeout=2)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait()
+sys.exit(1)
+" || {
+        echo "Failed to start darlingserver daemon." >&2
+        exit 1
+    }
+fi
+
+# Build Bubblewrap container arguments
+bwrap_args=(
+    "$bwrap"
+    --bind "$prefix" /
+    --bind "$HOME" "$HOME"
+    --ro-bind / /Volumes/SystemRoot
+    --dev /dev
+    --proc /proc
+    --uid 0
+    --gid 0
+    --setenv LD_PRELOAD "$shim"
+    --setenv ANYTHING_MAC_DIR "$runtime_root"
+    --setenv LD_LIBRARY_PATH "/usr/lib:/usr/lib/x86_64-linux-gnu:/Volumes/SystemRoot/usr/lib/x86_64-linux-gnu:/Volumes/SystemRoot/lib/x86_64-linux-gnu:${HOME}/.local/lib:${runtime_root}/usr/lib"
+    --setenv DYLD_ROOT_PATH /
+    --setenv DYLD_LIBRARY_PATH "/usr/lib:/usr/lib/system"
+    --setenv DYLD_FRAMEWORK_PATH "/System/Library/Frameworks"
+    --setenv __mldr_sockpath "/.darlingserver.sock"
+    --setenv __mldr_DYLD_ROOT_PATH /
+    --setenv DYLD_FORCE_FLAT_NAMESPACE "1"
+    --setenv DYLD_INSERT_LIBRARIES "/usr/lib/libanything_mac_tahoe_shim.dylib:/usr/lib/libdarling_tahoe_shim.dylib"
+)
+
+# Display & Audio forwarding (Darling Cocoa / AppKit runs via X11 backend)
+# Restrict display strictly to X11 (Xwayland) to prevent client crashes from affecting GNOME compositor
+if [[ -n "${DISPLAY:-}" && -d /tmp/.X11-unix ]]; then
+    bwrap_args+=(--ro-bind /tmp/.X11-unix /tmp/.X11-unix --setenv DISPLAY "${DISPLAY}")
+    if [[ -n "${XAUTHORITY:-}" && -f "${XAUTHORITY}" ]]; then
+        bwrap_args+=(--setenv XAUTHORITY "/Volumes/SystemRoot${XAUTHORITY}")
+    fi
+fi
+
+# Isolated runtime directory for container processes (prevents direct Wayland socket exposure)
+container_run="${prefix}/tmp/run"
+mkdir -p "$container_run"
+bwrap_args+=(--bind "$container_run" "/run/user/0" --setenv XDG_RUNTIME_DIR "/run/user/0")
+if [[ -n "${XDG_RUNTIME_DIR:-}" && -S "${XDG_RUNTIME_DIR}/pulse/native" ]]; then
+    mkdir -p "${container_run}/pulse"
+    bwrap_args+=(--ro-bind "${XDG_RUNTIME_DIR}/pulse/native" "/run/user/0/pulse/native")
+fi
+
+for device_dir in /dev/dri /dev/snd; do
+    if [[ -d "$device_dir" ]]; then
+        bwrap_args+=(--dir "$device_dir" --dev-bind "$device_dir" "$device_dir")
+    fi
+done
+
+# Architecture & macOS compatibility verification
+check_app_compatibility() {
+    local target="$1"
+    python3 -c "
+import os, sys, pathlib, struct, shutil
+
+target = sys.argv[1]
+prefix = sys.argv[2]
+p = pathlib.Path(target)
+if not p.is_absolute() or str(p).startswith('/Applications'):
+    app_path = pathlib.Path(prefix) / str(p).lstrip('/')
+else:
+    app_path = p
+
+bin_file = None
+if app_path.suffix == '.app' or (app_path / 'Contents').is_dir():
+    macos_dir = app_path / 'Contents' / 'MacOS'
+    plist_path = app_path / 'Contents' / 'Info.plist'
+    if plist_path.is_file():
+        try:
+            import plistlib
+            with open(plist_path, 'rb') as fp:
+                pl = plistlib.load(fp)
+                exe = pl.get('CFBundleExecutable')
+                if exe and (macos_dir / exe).is_file():
+                    bin_file = macos_dir / exe
+        except Exception:
+            pass
+    if not bin_file and macos_dir.is_dir():
+        for f in sorted(macos_dir.iterdir()):
+            if f.is_file() and os.access(f, os.X_OK):
+                bin_file = f
+                break
+elif app_path.is_file():
+    bin_file = app_path
+
+if not bin_file or not bin_file.is_file():
+    print('No executable found in the application bundle.', file=sys.stderr)
+    sys.exit(1)
+
+# 1. Check CPU architecture
+archs = []
+try:
+    with open(bin_file, 'rb') as f:
+        magic = f.read(4)
+        if len(magic) >= 4:
+            if magic in (b'\xfe\xed\xfa\xcf', b'\xcf\xfa\xed\xfe'):
+                cputype = struct.unpack('<I' if magic == b'\xcf\xfa\xed\xfe' else '>I', f.read(4))[0]
+                if cputype == 0x0100000c: archs.append('arm64')
+                elif cputype == 0x01000007: archs.append('x86_64')
+            elif magic in (b'\xfe\xed\xfa\xce', b'\xce\xfa\xed\xfe'):
+                cputype = struct.unpack('<I' if magic == b'\xce\xfa\xed\xfe' else '>I', f.read(4))[0]
+                if cputype == 7: archs.append('i386')
+            elif magic in (b'\xca\xfe\xba\xbe', b'\xbe\xba\xfe\xca'):
+                is_big = (magic == b'\xca\xfe\xba\xbe')
+                fmt = '>I' if is_big else '<I'
+                nfat = struct.unpack(fmt, f.read(4))[0]
+                for _ in range(nfat):
+                    cputype = struct.unpack(fmt, f.read(4))[0]
+                    f.read(16)
+                    if cputype == 0x0100000c: archs.append('arm64')
+                    elif cputype == 0x01000007: archs.append('x86_64')
+                    elif cputype == 7: archs.append('i386')
+except Exception:
+    archs = []
+
+host_machine = os.uname().machine
+app_name = app_path.name
+
+if host_machine == 'x86_64' and archs and 'x86_64' not in archs and 'i386' not in archs:
+    msg = (
+        f'\n[AnythingMac] Incompatible CPU Architecture:\n'
+        f'  Application \"{app_name}\" was compiled exclusively for Apple Silicon (ARM64).\n'
+        f'  Your laptop processor is Intel/AMD (x86_64).\n'
+        f'  Please download the Intel (x86_64) or Universal macOS version of this app.\n'
+    )
+    print(msg, file=sys.stderr)
+    if os.environ.get('DISPLAY'):
+        if shutil.which('zenity'):
+            html_msg = (
+                f'<b>{app_name}</b> was built exclusively for <b>Apple Silicon (ARM64)</b>.<br><br>'
+                f'Your laptop has an <b>Intel/AMD (x86_64)</b> processor.<br><br>'
+                f'Darling runs macOS apps natively on your CPU without CPU emulation.<br>'
+                f'Please download the <b>Intel (x86_64)</b> or <b>Universal</b> version of this application.'
+            )
+            subprocess.run([
+                'zenity', '--error',
+                '--title=Darling - Architecture Incompatible',
+                '--text=' + html_msg,
+                '--no-wrap'
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    sys.exit(2)
+
+try:
+    app_real = bin_file.resolve()
+    prefix_real = pathlib.Path(prefix).resolve()
+    try:
+        container_executable = '/' + app_real.relative_to(prefix_real).as_posix()
+    except ValueError:
+        home_real = pathlib.Path.home().resolve()
+        if app_real.is_relative_to(home_real):
+            container_executable = str(app_real)
+        else:
+            container_executable = '/Volumes/SystemRoot' + str(app_real)
+    print(container_executable)
+except Exception as exc:
+    print(f'Could not map application executable into the container: {exc}', file=sys.stderr)
+    sys.exit(1)
+" "$target" "$prefix"
+}
+
+# Argument processing
+if [[ $# -eq 0 ]]; then
+    # Interactive Darwin shell
+    exec "${bwrap_args[@]}" "$mldr_bin" /bin/zsh
+fi
+
+case "${1}" in
+    launch)
+        shift
+        if [[ $# -eq 0 ]]; then
+            echo "Usage: anything-mac launch /Applications/Name.app" >&2
+            exit 2
+        fi
+        if [[ -z "${DISPLAY:-}" ]]; then
+            echo "A GUI display is required. Start an X11/Xwayland session and retry." >&2
+            exit 1
+        fi
+        app="$1"
+        shift
+        app_executable=$(check_app_compatibility "$app") || exit 1
+        exec "${bwrap_args[@]}" "$mldr_bin" "$app_executable" "$@"
+        ;;
+    shell)
+        shift
+        if [[ $# -eq 0 ]]; then
+            exec "${bwrap_args[@]}" "$mldr_bin" /bin/zsh
+        fi
+        exec "${bwrap_args[@]}" "$mldr_bin" "$@"
+        ;;
+    shutdown)
+        if [[ -f "$pid_file" ]]; then
+            pid=$(cat "$pid_file" 2>/dev/null || true)
+            if [[ -n "$pid" ]]; then
+                kill -TERM "$pid" 2>/dev/null || true
+            fi
+            rm -f "$pid_file" "$socket_path"
+            echo "AnythingMac container shut down."
+        else
+            echo "AnythingMac container is not running."
+        fi
+        exit 0
+        ;;
+    status)
+        if is_dserver_alive; then
+            echo "AnythingMac status: running (PID $(cat "$pid_file"))"
+        else
+            echo "AnythingMac status: stopped"
+        fi
+        exit 0
+        ;;
+    *)
+        # Launch a bundle's own executable to avoid depending on LaunchServices.
+        if [[ "$1" == *.app* ]]; then
+            if [[ -z "${DISPLAY:-}" ]]; then
+                echo "A GUI display is required. Start an X11/Xwayland session and retry." >&2
+                exit 1
+            fi
+            app="$1"
+            shift
+            app_executable=$(check_app_compatibility "$app") || exit 1
+            exec "${bwrap_args[@]}" "$mldr_bin" "$app_executable" "$@"
+        else
+            exec "${bwrap_args[@]}" "$mldr_bin" "$@"
+        fi
+        ;;
+esac

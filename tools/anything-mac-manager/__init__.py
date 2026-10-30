@@ -1,0 +1,3 @@
+"""
+Darling App Manager package.
+"""

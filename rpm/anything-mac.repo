@@ -1,0 +1,5 @@
+[anything-mac]
+name=AnythingMac
+baseurl=file:///data/git/anything-mac-update/rpm/RPMS/x86_64
+enabled=1
+gpgcheck=0
