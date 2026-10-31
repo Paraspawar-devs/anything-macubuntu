@@ -512,8 +512,15 @@ def inspect_app_bundle(
     is_installed = installed_app_path.is_dir()
     desktop_file = (
         pathlib.Path("~/.local/share/applications").expanduser()
-        / f"darling-{bundle_id}.desktop"
+        / f"anything-mac-{bundle_id}.desktop"
     )
+    if not desktop_file.exists():
+        legacy_df = (
+            pathlib.Path("~/.local/share/applications").expanduser()
+            / f"darling-{bundle_id}.desktop"
+        )
+        if legacy_df.exists():
+            desktop_file = legacy_df
 
     return AppInfo(
         bundle_path=str(path),
@@ -981,8 +988,15 @@ def install_app(
             progress_callback("Installing application icons...", 0.6)
 
         # Install icons to FreeDesktop hicolor directory
-        desktop_id = f"darling-{app_info.bundle_id}"
+        desktop_id = f"anything-mac-{app_info.bundle_id}"
         hicolor_base = pathlib.Path("~/.local/share/icons/hicolor").expanduser()
+
+        # Remove legacy darling icons if reinstalling
+        legacy_desktop_id = f"darling-{app_info.bundle_id}"
+        for res in [512, 256, 128, 64, 48, 32]:
+            leg_icon = hicolor_base / f"{res}x{res}" / "apps" / f"{legacy_desktop_id}.png"
+            if leg_icon.exists():
+                leg_icon.unlink()
 
         # Generate / copy icons for standard sizes
         icon_resolutions = app_info.icon_resolutions or extract_app_icons(dest_bundle)
@@ -1000,25 +1014,29 @@ def install_app(
         desktop_dir.mkdir(parents=True, exist_ok=True)
         desktop_file = desktop_dir / f"{desktop_id}.desktop"
 
-        # Determine exec command for Darling
-        # We invoke darling launch or darling shell open
-        exec_cmd = f'darling launch "/Applications/{dest_bundle.name}"'
+        # Remove legacy desktop file if exists
+        legacy_df = desktop_dir / f"{legacy_desktop_id}.desktop"
+        if legacy_df.exists():
+            legacy_df.unlink()
+
+        # Determine exec command for AnythingMac
+        exec_cmd = f'anything-mac launch "/Applications/{dest_bundle.name}"'
 
         desktop_content = f"""[Desktop Entry]
 Version=1.0
 Type=Application
 Name={app_info.display_name}
 GenericName=macOS Application
-Comment={app_info.bundle_name} (via Darling)
+Comment={app_info.bundle_name} (via AnythingMac)
 Exec={exec_cmd}
 Icon={desktop_id}
 Terminal=false
 Categories=Utility;macOS;
 StartupNotify=false
 StartupWMClass={app_info.executable_name or app_info.bundle_name}
-X-Darling-BundleID={app_info.bundle_id}
-X-Darling-Path=/Applications/{dest_bundle.name}
-X-Darling-Arch={','.join(app_info.architectures)}
+X-AnythingMac-BundleID={app_info.bundle_id}
+X-AnythingMac-Path=/Applications/{dest_bundle.name}
+X-AnythingMac-Arch={','.join(app_info.architectures)}
 """
         desktop_file.write_text(desktop_content, encoding="utf-8")
         desktop_file.chmod(0o755)
@@ -1051,7 +1069,7 @@ X-Darling-Arch={','.join(app_info.architectures)}
         if progress_callback:
             progress_callback("Installation complete!", 1.0)
 
-        return True, f"Successfully installed '{app_info.display_name}' into Darling."
+        return True, f"Successfully installed '{app_info.display_name}' into AnythingMac."
     except Exception as e:
         logger.error("Failed to install app %s: %s", app_info.display_name, e, exc_info=True)
         return False, f"Installation failed: {e}"
@@ -1109,11 +1127,12 @@ def uninstall_app(app_info_or_name: Union[AppInfo, str]) -> Tuple[bool, str]:
                 else:
                     target.unlink()
 
-        # 2. Remove desktop shortcut
-        desktop_id = f"darling-{bundle_id}"
-        desktop_file = desktop_dir / f"{desktop_id}.desktop"
-        if desktop_file.is_file():
-            desktop_file.unlink()
+        # 2. Remove desktop shortcuts (both new anything-mac and legacy darling)
+        for prefix_tag in ["anything-mac", "darling"]:
+            did = f"{prefix_tag}-{bundle_id}"
+            df = desktop_dir / f"{did}.desktop"
+            if df.is_file():
+                df.unlink()
 
         if isinstance(app_info_or_name, AppInfo) and app_info_or_name.desktop_file_path:
             p = pathlib.Path(app_info_or_name.desktop_file_path)
@@ -1121,17 +1140,18 @@ def uninstall_app(app_info_or_name: Union[AppInfo, str]) -> Tuple[bool, str]:
                 p.unlink()
 
         # Also search for any desktop file containing this bundle
-        for df in desktop_dir.glob("darling-*.desktop"):
-            try:
-                content = df.read_text(errors="ignore")
-                if bundle_name in content or (bundle_id and bundle_id in content):
-                    df.unlink()
-            except Exception:
-                pass
+        for pat in ["anything-mac-*.desktop", "darling-*.desktop"]:
+            for df in desktop_dir.glob(pat):
+                try:
+                    content = df.read_text(errors="ignore")
+                    if bundle_name in content or (bundle_id and bundle_id in content):
+                        df.unlink()
+                except Exception:
+                    pass
 
         # 3. Remove icons
-        for res in [512, 256, 128, 64, 32]:
-            for did in [desktop_id, bundle_id, bundle_name]:
+        for res in [512, 256, 128, 64, 48, 32]:
+            for did in [f"anything-mac-{bundle_id}", f"darling-{bundle_id}", bundle_id, bundle_name]:
                 icon_file = hicolor_base / f"{res}x{res}" / "apps" / f"{did}.png"
                 if icon_file.is_file():
                     icon_file.unlink()
