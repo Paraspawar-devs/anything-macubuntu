@@ -27,7 +27,7 @@ import anything_mac_backend
 from anything_mac_backend import AppInfo
 
 APP_ID = "io.github.anythingmac.Manager"
-APP_TITLE = "AnythingMac Manager"
+APP_TITLE = "Anything-Mac"
 APP_VERSION = "1.0.0"
 
 CUSTOM_CSS = b"""
@@ -897,7 +897,7 @@ class AnythingMacMainWindow(Adw.ApplicationWindow):
 
         # Group 1: AnythingMac Runtime
         grp_runtime = Adw.PreferencesGroup()
-        grp_runtime.set_title("Engine Status & Compatibility")
+        grp_runtime.set_title("Engine Status &amp; Compatibility")
         grp_runtime.set_description("Container isolation and macOS API shim layers")
 
         self.row_darling_bin = Adw.ActionRow()
@@ -913,7 +913,7 @@ class AnythingMacMainWindow(Adw.ApplicationWindow):
         grp_runtime.add(self.row_tahoe_shim)
 
         self.row_sandbox_mode = Adw.ActionRow()
-        self.row_sandbox_mode.set_title("Security & Sandbox Mode")
+        self.row_sandbox_mode.set_title("Security &amp; Sandbox Mode")
         grp_runtime.add(self.row_sandbox_mode)
 
         self.row_mach_dev = Adw.ActionRow()
@@ -1022,7 +1022,7 @@ class AnythingMacMainWindow(Adw.ApplicationWindow):
         self.row_prefix_path.set_subtitle(prefix_text)
 
         if hasattr(self, "row_tahoe_shim"):
-            self.row_tahoe_shim.set_subtitle("Active (libanything_mac_tahoe_shim.dylib • 3,336 Dynamic APIs & ObjC Dispatcher)")
+            self.row_tahoe_shim.set_subtitle("Active (libanything_mac_tahoe_shim.dylib • 3,534 Dynamic APIs &amp; ObjC Dispatcher)")
 
         if hasattr(self, "row_sandbox_mode"):
             self.row_sandbox_mode.set_subtitle("Bubblewrap Rootless (Zero Sudo / Zero Kernel Module)")

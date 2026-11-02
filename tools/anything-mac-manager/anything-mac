@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Rootless Darling launcher for Ubuntu 26.04.1 LTS Resolute
+# Rootless Anything-Mac launcher for Ubuntu 26.04.1 LTS Resolute
 # Runs macOS applications seamlessly without root / kernel module
 set -euo pipefail
 
@@ -13,14 +13,14 @@ shim="${runtime_root}/librootless.so"
 bwrap="$(command -v bwrap || true)"
 
 if [[ -z "$bwrap" || ! -f "$shim" || ! -x "$mldr_bin" || ! -x "$dserver_bin" ]]; then
-    # Fallback to system darling if available
+    # Fallback to system anything-mac / darling if available
     while IFS= read -r candidate; do
         [[ -n "$candidate" && -x "$candidate" ]] || continue
         [[ "$(readlink -f "$candidate")" == "$(readlink -f "$0")" ]] && continue
         exec "$candidate" "$@"
-    done < <(type -a -p darling 2>/dev/null || true)
+    done < <(type -a -p anything-mac darling 2>/dev/null || true)
 
-    echo "Error: Rootless Darling runtime not found at ${runtime_root}." >&2
+    echo "Error: Rootless Anything-Mac runtime not found at ${runtime_root}." >&2
     exit 127
 fi
 
@@ -84,7 +84,7 @@ if proc.poll() is None:
         proc.wait()
 sys.exit(1)
 " || {
-        echo "Failed to start darlingserver daemon." >&2
+        echo "Failed to start Anything-Mac darlingserver daemon." >&2
         exit 1
     }
 fi
@@ -99,6 +99,7 @@ bwrap_args=(
     --proc /proc
     --uid 0
     --gid 0
+    --chdir /
     --setenv LD_PRELOAD "$shim"
     --setenv ANYTHING_MAC_DIR "$runtime_root"
     --setenv LD_LIBRARY_PATH "/usr/lib:/usr/lib/x86_64-linux-gnu:/Volumes/SystemRoot/usr/lib/x86_64-linux-gnu:/Volumes/SystemRoot/lib/x86_64-linux-gnu:${HOME}/.local/lib:${runtime_root}/usr/lib"
@@ -111,7 +112,7 @@ bwrap_args=(
     --setenv DYLD_INSERT_LIBRARIES "/usr/lib/libanything_mac_tahoe_shim.dylib:/usr/lib/libdarling_tahoe_shim.dylib"
 )
 
-# Display & Audio forwarding (Darling Cocoa / AppKit runs via X11 backend)
+# Display & Audio forwarding (Anything-Mac Cocoa / AppKit runs via X11 backend)
 # Restrict display strictly to X11 (Xwayland) to prevent client crashes from affecting GNOME compositor
 if [[ -n "${DISPLAY:-}" && -d /tmp/.X11-unix ]]; then
     bwrap_args+=(--ro-bind /tmp/.X11-unix /tmp/.X11-unix --setenv DISPLAY "${DISPLAY}")
@@ -217,12 +218,12 @@ if host_machine == 'x86_64' and archs and 'x86_64' not in archs and 'i386' not i
             html_msg = (
                 f'<b>{app_name}</b> was built exclusively for <b>Apple Silicon (ARM64)</b>.<br><br>'
                 f'Your laptop has an <b>Intel/AMD (x86_64)</b> processor.<br><br>'
-                f'Darling runs macOS apps natively on your CPU without CPU emulation.<br>'
+                f'Anything-Mac runs macOS apps natively on your CPU without CPU emulation.<br>'
                 f'Please download the <b>Intel (x86_64)</b> or <b>Universal</b> version of this application.'
             )
             subprocess.run([
                 'zenity', '--error',
-                '--title=Darling - Architecture Incompatible',
+                '--title=Anything-Mac - Architecture Incompatible',
                 '--text=' + html_msg,
                 '--no-wrap'
             ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

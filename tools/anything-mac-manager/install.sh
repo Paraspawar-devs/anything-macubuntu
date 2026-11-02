@@ -20,13 +20,17 @@ mkdir -p "${APP_DATA_DIR}"
 mkdir -p "${DESKTOP_DIR}"
 mkdir -p "${ICON_DIR}"
 
-# Remove legacy Darling desktop entries if present
+# Remove legacy Darling desktop entries, icons, and symlinks
 rm -f "${DESKTOP_DIR}/org.darlinghq.DarlingManager.desktop"
+rm -f "${DESKTOP_DIR}/org.darlinghq."*.desktop
+rm -f "${DESKTOP_DIR}/darling-"*.desktop
+rm -f "${BIN_DIR}/darling" "${BIN_DIR}/darling-manager"
 
 # 2. Copy application files
 echo "-> Installing application files to ${APP_DATA_DIR}..."
 cp -f "${SCRIPT_DIR}/anything_mac_backend.py" "${APP_DATA_DIR}/"
 cp -f "${SCRIPT_DIR}/anything_mac_runtime.py" "${APP_DATA_DIR}/"
+cp -f "${SCRIPT_DIR}/generate_tahoe_shim.py" "${APP_DATA_DIR}/"
 cp -f "${SCRIPT_DIR}/anything-mac" "${BIN_DIR}/anything-mac"
 chmod +x "${BIN_DIR}/anything-mac"
 ln -sfn "${BIN_DIR}/anything-mac" "${BIN_DIR}/amac"
